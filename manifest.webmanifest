@@ -1,0 +1,10 @@
+{
+  "name": "Mein Essensplan",
+  "short_name": "Essensplan",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f1",
+  "theme_color": "#163c2d",
+  "lang": "de",
+  "description": "Persönlicher Essensplan mit Tages-Einkauf und Vorrat"
+}
