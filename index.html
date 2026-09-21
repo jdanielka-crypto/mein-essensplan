@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.7</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.8</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -93,6 +93,10 @@ const baseProducts=[
 {id:'tomato1',name:'Tomate',pack:1,unit:'Stück',type:'frisch'},
 {id:'cucumber1',name:'Gurke',pack:1,unit:'Stück',type:'frisch'},
 {id:'pepper1',name:'Paprika',pack:1,unit:'Stück',type:'frisch'},
+{id:'springOnionBunch',name:'Lauchzwiebeln im Bund',pack:1,unit:'Bund',type:'frisch',articleNumber:'482404'},
+{id:'broccoliFrozen1k',name:'ja! Broccoli Röschen tiefgefroren',brand:'ja!',pack:1000,unit:'g',type:'TK',articleNumber:'7073900',nutrition:{kcal:35,fat:0.5,satfat:0.1,carbs:2.8,sugar:1.6,fiber:2.8,protein:3.3,salt:0.02}},
+{id:'cauliflowerFrozen1k',name:'ja! Blumenkohl tiefgefroren',brand:'ja!',pack:1000,unit:'g',type:'TK',articleNumber:'7067903',nutrition:{kcal:20,fat:0,satfat:0,carbs:2.1,sugar:1.6,protein:1.9,salt:0.05}},
+{id:'pointedCabbage1k',name:'Spitzkohl ca. 1kg',pack:1000,unit:'g',type:'frisch',articleNumber:'482366',variableWeight:true}
 {id:'yogurt500',name:'Naturjoghurt',pack:500,unit:'g',type:'Kühlschrank'}
 ];
 let customProducts=JSON.parse(localStorage.customProducts||'[]');
@@ -181,7 +185,7 @@ let checked=JSON.parse(localStorage.checkedV2||'{}');
 const meals=[
 {day:'Montag',name:'Teriyaki-Hähnchen mit Brokkoli & Reis',kcal:700,time:'20 Min.',device:'Wok + Topf',
 source:'Chef De Home',sourceUrl:'https://www.chefdehome.com/recipes/948/teriyaki-chicken',
-needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['Brokkoli','150 g'],['soyLight150',25],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['sugar1k',10],['Frühlingszwiebel','1 Stück']],
+needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['broccoliFrozen1k',150],['soyLight150',25],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['sugar1k',10],['Frühlingszwiebel','1 Stück']],
 steps:['75 g Reis kochen.','Sauce aus Sojasauce, Reisessig, Ingwer, Knoblauch, wenig Süße und Speisestärke anrühren.','200 g Hähnchen im sehr heißen Wok kräftig anbraten.','Sauce zugeben und kurz einkochen, bis sie glänzend am Hähnchen haftet.','Brokkoli kurz mitgaren, sodass er bissfest bleibt. Mit wenig Sesamöl und Frühlingszwiebel abschließen.']},
 {day:'Dienstag',name:'Griechisches Hähnchen-Souvlaki mit Tzatziki & Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
 source:'The Mediterranean Dish',sourceUrl:'https://www.themediterraneandish.com/greek-chicken-souvlaki-recipe-tzatziki/',
