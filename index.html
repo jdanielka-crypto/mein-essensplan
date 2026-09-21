@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.5</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.6</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -59,6 +59,8 @@ const baseProducts=[
 {id:'peasCarrots265',name:'ja! Erbsen mit Möhren',pack:265,unit:'g',type:'Vorrat'},
 {id:'oil1l',name:'ja! Sonnenblumenöl',pack:1000,unit:'ml',type:'Vorrat'},
 {id:'sesame500',name:'Brändle vita Sesamöl kaltgepresst',brand:'Brändle',pack:500,unit:'ml',type:'Vorrat',articleNumber:'5305756',verifiedAt:'2026-09-22',nutrition:{kcal:828,fat:92,satfat:12,carbs:0,sugar:0,fiber:null,protein:0,salt:0}},
+{id:'soyDark150',name:'Lee Kum Kee Dunkle Sojasauce',brand:'Lee Kum Kee',pack:150,unit:'ml',type:'Vorrat',articleNumber:'2373543',verifiedAt:'2026-09-22',nutrition:{kcal:148,fat:0.5,satfat:0.1,carbs:31,sugar:17,fiber:null,protein:6.1,salt:19.3}},
+{id:'soyLight150',name:'Lee Kum Kee Helle Sojasauce Supreme',brand:'Lee Kum Kee',pack:150,unit:'ml',type:'Vorrat',articleNumber:'2373544',verifiedAt:'2026-09-22',nutrition:{kcal:95,fat:0.5,satfat:0.1,carbs:9.7,sugar:2.9,fiber:null,protein:11,salt:16.9}},
 {id:'onion1k',name:'Speisezwiebeln im Netz',pack:1000,unit:'g',type:'Vorrat'},
 {id:'garlic',name:'Knoblauch',pack:1,unit:'Stück',type:'Vorrat'},
 {id:'flour1k',name:'ja! Weizenmehl Type 405',pack:1000,unit:'g',type:'Vorrat'},
@@ -76,7 +78,7 @@ const baseProducts=[
 {id:'frik500',name:'ja! Mini-Geflügelfrikadellen',pack:500,unit:'g',type:'Kühlschrank'},
 {id:'ciabatta300',name:'Ciabatta',pack:300,unit:'g',type:'frisch'},
 {id:'polenta500',name:'Suntat Polenta Maisgrieß',brand:'Suntat',pack:1000,unit:'g',type:'Vorrat',articleNumber:'6050417',verifiedAt:'2026-09-21',nutrition:{kcal:297,fat:2.8,satfat:0.4,carbs:36,sugar:5.6,fiber:null,protein:19,salt:0.01}},
-{id:'skyr500',name:'Skyr natur',pack:500,unit:'g',type:'Kühlschrank'},
+{id:'skyr500',name:'Berchtesgadener Land Skyr natur 0,2% Fett',brand:'Berchtesgadener Land',pack:400,unit:'g',type:'Kühlschrank',articleNumber:'7353821',verifiedAt:'2026-09-22',nutrition:{kcal:62,fat:0.2,satfat:0.13,carbs:3.4,sugar:3.4,fiber:null,protein:11,salt:0.08}},
 {id:'oats500',name:'Haferflocken',pack:500,unit:'g',type:'Vorrat'},
 {id:'apple1',name:'Apfel',pack:1,unit:'Stück',type:'frisch'},
 {id:'banana1',name:'Banane',pack:1,unit:'Stück',type:'frisch'},
@@ -175,7 +177,7 @@ let checked=JSON.parse(localStorage.checkedV2||'{}');
 const meals=[
 {day:'Montag',name:'Teriyaki-Hähnchen mit Brokkoli & Reis',kcal:700,time:'20 Min.',device:'Wok + Topf',
 source:'Chef De Home',sourceUrl:'https://www.chefdehome.com/recipes/948/teriyaki-chicken',
-needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['Brokkoli','150 g'],['Sojasauce, natriumreduziert','25 ml'],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['sugar1k',10],['Frühlingszwiebel','1 Stück']],
+needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['Brokkoli','150 g'],['soyLight150',25],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['sugar1k',10],['Frühlingszwiebel','1 Stück']],
 steps:['75 g Reis kochen.','Sauce aus Sojasauce, Reisessig, Ingwer, Knoblauch, wenig Süße und Speisestärke anrühren.','200 g Hähnchen im sehr heißen Wok kräftig anbraten.','Sauce zugeben und kurz einkochen, bis sie glänzend am Hähnchen haftet.','Brokkoli kurz mitgaren, sodass er bissfest bleibt. Mit wenig Sesamöl und Frühlingszwiebel abschließen.']},
 {day:'Dienstag',name:'Griechisches Hähnchen-Souvlaki mit Tzatziki & Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
 source:'The Mediterranean Dish',sourceUrl:'https://www.themediterraneandish.com/greek-chicken-souvlaki-recipe-tzatziki/',
@@ -183,7 +185,7 @@ needs:[['chicken600',200],['fries1k',250],['yogurt500',150],['cucumber1',1]],ext
 steps:['Hähnchen mit Zitronensaft, Knoblauch, Oregano, Rosmarin, Paprika, Pfeffer und wenig Olivenöl marinieren.','250 g Wedges in Zone 1 knusprig garen.','Hähnchen in Zone 2 vollständig garen und leicht bräunen.','Aus Joghurt, geriebener Gurke, Knoblauch und Zitrone Tzatziki rühren.','Mit Tomate und Tzatziki servieren.']},
 {day:'Mittwoch',name:'Garnelen-Gemüse-Stir-Fry mit Reis',kcal:650,time:'20 Min.',device:'Wok + Topf',
 source:'Damn Delicious',sourceUrl:'https://damndelicious.net/2015/01/16/easy-shrimp-broccoli-stir-fry/',
-needs:[['prawns225',225],['wok750',300],['riceJ1k',70],['starch400',5]],extras:[['Sojasauce, natriumreduziert','20 ml'],['Austernsauce','15 ml'],['Reisessig','10 ml'],['Ingwer','8 g'],['Knoblauch','1 Zehe'],['Sesamöl','5 ml'],['Sriracha','optional']],
+needs:[['prawns225',225],['wok750',300],['riceJ1k',70],['starch400',5]],extras:[['soyLight150',20],['Austernsauce','15 ml'],['Reisessig','10 ml'],['Ingwer','8 g'],['Knoblauch','1 Zehe'],['Sesamöl','5 ml'],['Sriracha','optional']],
 steps:['70 g Reis kochen.','Sauce aus Sojasauce, Austernsauce, Reisessig, Ingwer, Knoblauch, Sesamöl und etwas Speisestärke anrühren.','Wok sehr heiß werden lassen und Gemüse kräftig anbraten.','Garnelen dazugeben und nur so lange braten, bis sie gar sind.','Sauce einrühren und kurz eindicken lassen. Mit Reis servieren.']},
 {day:'Donnerstag',name:'Chili con Carne mit Bohnen',kcal:690,time:'35 Min.',device:'Topf',
 source:'Plain Chicken',sourceUrl:'https://www.plainchicken.com/lunch-lady-chili-con-carne/',
