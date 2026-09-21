@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.6</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -39,7 +39,7 @@ footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;back
 <main>
 <section id="today" class="view active"></section><section id="shop" class="view"></section><section id="cook" class="view"></section>
 <section id="week" class="view"></section><section id="stock" class="view"></section><section id="products" class="view"></section>
-</main><footer>Version 2.6 · fehlende Rezeptprodukte erkennen · Cloud-Synchronisierung + lokaler Offline-Speicher</footer>
+</main><footer>Version 2.7 · REWE-Linkimport + manuelle Produkte · Cloud-Synchronisierung</footer>
 <script>
 const baseProducts=[
 {id:'chicken600',name:'ja! Hähnchen-Brustfilet',pack:600,unit:'g',type:'frisch'},
@@ -271,10 +271,28 @@ function useMeal(){
  let m=meals[selected]; m.needs.forEach(([id,n])=>setInv(id,Math.max(0,have(id)-n))); alert('Verbrauch wurde aus dem Vorrat abgezogen. Restmengen kannst du im Vorrat korrigieren.');
 }
 function toggleCheck(k,v){checked[k]=v;localStorage.checkedV2=JSON.stringify(checked)}
+async function importReweUrl(){
+ const url=document.getElementById('purl').value.trim(),status=document.getElementById('purlstatus');
+ if(!url)return alert('Bitte zuerst einen REWE-Link einfügen.');
+ status.textContent='⏳ REWE-Produkt wird gelesen…';
+ try{
+  const r=await fetch('/api/rewe-product',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url})});
+  const d=await r.json(); if(!r.ok)throw new Error(d.error||'Einlesen fehlgeschlagen');
+  if(d.name)document.getElementById('pn').value=d.name;
+  if(d.pack)document.getElementById('pp').value=d.pack;
+  if(d.unit)document.getElementById('pu').value=d.unit;
+  window.pendingProductImport=d;
+  const n=d.nutrition||{};
+  const found=[n.kcal!=null?n.kcal+' kcal':'',n.protein!=null?n.protein+' g Eiweiß':'',n.fat!=null?n.fat+' g Fett':'',n.carbs!=null?n.carbs+' g KH':'',n.salt!=null?n.salt+' g Salz':''].filter(Boolean).join(' · ');
+  status.innerHTML='✅ Daten gefunden'+(d.brand?' · '+d.brand:'')+(d.articleNumber?' · REWE '+d.articleNumber:'')+(found?'<br><span class="tiny">'+found+' / 100 g</span>':'')+'<br><span class="tiny">Bitte prüfen und anschließend Produkt speichern.</span>';
+ }catch(e){status.textContent='⚠️ '+e.message+' Du kannst das Produkt weiterhin manuell eintragen.';}
+}
 function addProduct(){
  let name=document.getElementById('pn').value.trim(),pack=+document.getElementById('pp').value,unit=document.getElementById('pu').value,type=document.getElementById('pt').value;
  if(!name||!pack)return alert('Bitte Produktname und Packungsgröße eingeben.');
- let id='custom'+Date.now();customProducts.push({id,name,pack,unit,type});localStorage.customProducts=JSON.stringify(customProducts);render();syncCustomProductsToCloud();
+ let id='custom'+Date.now(),imp=window.pendingProductImport||{};
+ customProducts.push({id,name,pack,unit,type,brand:imp.brand||'',sourceUrl:imp.sourceUrl||'',articleNumber:imp.articleNumber||'',nutrition:imp.nutrition||null});
+ window.pendingProductImport=null;localStorage.customProducts=JSON.stringify(customProducts);render();syncCustomProductsToCloud();
 }
 function render(){
  const n=germanyNow();
@@ -297,7 +315,7 @@ function render(){
  week.innerHTML=`<div class="card"><h2>Wochenplan</h2>${meals.map((x,i)=>{const d=dayMeals[i];return `<div class="product day" onclick="selectDay(${i})"><span class="tiny muted">${x.day}</span><strong>🥣 ${d.breakfast.name}</strong><div class="small">🍽️ ${x.name}</div><div class="small">🌙 ${d.dinner.name}</div><div class="tiny muted" style="margin-top:5px">≈ ${d.breakfast.kcal+x.kcal+d.dinner.kcal} kcal gesamt</div></div>`}).join('')}</div>`;
  stock.innerHTML=`<div class="card"><h2>🏠 Mein Vorrat</h2><p class="muted">Hier zählt die tatsächlich noch vorhandene Menge.</p>${productsAll().map(p=>`<div class="product"><div class="between row"><div><strong>${p.name}</strong><div class="tiny muted">${p.type} · Packung ${p.pack} ${p.unit}</div></div><span class="pill">${fmt(have(p.id))} ${p.unit}</span></div><div class="grid2" style="margin-top:9px"><button class="btn alt" onclick="addInv('${p.id}',${p.pack})">+ 1 Packung</button><input inputmode="decimal" value="${fmt(have(p.id))}" onchange="setInv('${p.id}',this.value)" aria-label="Bestand"></div></div>`).join('')}</div>`;
  products.innerHTML=`<div class="card"><h2>❤️ Meine Produkte</h2><p class="muted">Startbestand aus deinen REWE-Favoriten. Fehlende Produkte kannst du jederzeit ergänzen.</p>${productsAll().map(p=>`<div class="item"><strong>${p.name}</strong><span class="small">${p.pack} ${p.unit} · ${p.type}</span></div>`).join('')}</div>
- <div class="card"><h3>➕ Produkt hinzufügen</h3><input id="pn" placeholder="z. B. Polenta"><div class="grid2" style="margin-top:8px"><input id="pp" type="number" placeholder="Packungsgröße"><select id="pu"><option>g</option><option>ml</option><option>Stück</option></select></div><select id="pt" style="margin-top:8px"><option>Vorrat</option><option>Kühlschrank</option><option>TK</option><option>frisch</option></select><button class="btn" onclick="addProduct()">Produkt speichern</button></div>`;
+ <div class="card"><h3>➕ Produkt hinzufügen</h3><div class="notice small"><strong>Von REWE übernehmen</strong><br>REWE-Produktlink einfügen. Gefundene Angaben werden übernommen und können vor dem Speichern geprüft werden.</div><input id="purl" type="url" placeholder="https://www.rewe.de/shop/p/..."><button class="btn alt" onclick="importReweUrl()">🔗 Daten aus REWE-Link übernehmen</button><div id="purlstatus" class="small muted" style="margin:9px 0"></div><div class="tiny muted" style="margin:14px 0 5px">ODER MANUELL EINGEBEN</div><input id="pn" placeholder="Produktname, z. B. Polenta"><div class="grid2" style="margin-top:8px"><input id="pp" type="number" placeholder="Packungsgröße"><select id="pu"><option>g</option><option>ml</option><option>Stück</option></select></div><select id="pt" style="margin-top:8px"><option>Vorrat</option><option>Kühlschrank</option><option>TK</option><option>frisch</option></select><button class="btn" onclick="addProduct()">Produkt speichern</button></div>`;
 }
 render();initCloud();
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
