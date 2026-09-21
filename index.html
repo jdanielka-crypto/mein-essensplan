@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#163c2d"><title>Mein Essensplan V2.3</title>
+<style>
+:root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:22px 16px 10px;max-width:760px;margin:auto}h1{font-size:27px;margin:0}header p{color:var(--muted);margin:5px 0}
+.tabs{position:sticky;top:0;background:rgba(244,246,241,.97);padding:8px;display:flex;gap:6px;overflow:auto;z-index:5;max-width:760px;margin:auto}
+.tabs button{border:0;border-radius:999px;padding:10px 13px;background:#fff;font-weight:750;white-space:nowrap}.tabs button.active{background:var(--green);color:#fff}
+main{max-width:760px;margin:auto;padding:7px 13px 90px}.view{display:none}.view.active{display:block}.card{background:var(--card);border-radius:20px;padding:17px;margin:10px 0;box-shadow:0 2px 12px #0000000b}
+.hero{background:var(--green);color:#fff}.hero .muted{color:#d8e5dc}.muted{color:var(--muted)}h2,h3{margin:4px 0 10px}
+.badge{display:inline-block;background:var(--accent);color:#28442f;padding:6px 9px;border-radius:10px;font-size:13px;font-weight:750;margin:2px}.hero .badge{background:#ffffff1f;color:#fff}
+.btn{width:100%;border:0;border-radius:14px;padding:13px 14px;font-weight:800;font-size:15px;margin-top:9px;background:var(--green);color:#fff}.btn.alt{background:var(--light);color:var(--green)}.btn.small{width:auto;padding:8px 10px;margin:0}
+.row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}.wrap{flex-wrap:wrap}.small{font-size:13px}.tiny{font-size:12px}
+.item{padding:12px 0;border-bottom:1px solid #eee}.item:last-child{border:0}.item strong{display:block}
+.check{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid #eee}.check input{width:21px;height:21px}.day{cursor:pointer}
+.step{display:flex;gap:12px;margin:14px 0}.num{min-width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-weight:800}
+input,select{width:100%;border:1px solid #d8ddd9;border-radius:12px;padding:11px;background:#fff;font:inherit}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.product{border:1px solid #edf0ed;border-radius:16px;padding:13px;margin:9px 0}.product .qty{font-weight:800;color:var(--green)}
+.notice{background:var(--warn);border-radius:14px;padding:11px;margin:10px 0}.pill{border-radius:999px;background:#eef3ef;padding:5px 8px;font-size:12px}
+footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;background:#f4f6f1;color:var(--muted);font-size:12px}
+</style></head><body>
+<header><h1>🍽️ Mein Essensplan</h1><p>Deine Produkte · kleine Einkäufe · echte Packungsgrößen</p>
+<p id="clockline" class="small"></p></header>
+<nav class="tabs" id="tabs">
+<button data-v="today" class="active">Heute</button><button data-v="shop">Einkaufen</button><button data-v="cook">Kochen</button>
+<button data-v="week">Woche</button><button data-v="stock">Vorrat</button><button data-v="products">Produkte</button>
+</nav>
+<main>
+<section id="today" class="view active"></section><section id="shop" class="view"></section><section id="cook" class="view"></section>
+<section id="week" class="view"></section><section id="stock" class="view"></section><section id="products" class="view"></section>
+</main><footer>Version 2.3 · Tages-Einkauf für 3 Mahlzeiten · Deutschland-Zeit · Daten bleiben lokal</footer>
+<script>
+const baseProducts=[
+{id:'chicken600',name:'ja! Hähnchen-Brustfilet',pack:600,unit:'g',type:'frisch'},
+{id:'prawns225',name:'ja! King Prawns Garnelen',pack:225,unit:'g',type:'TK'},
+{id:'kidney255',name:'ja! Kidney-Bohnen rot',pack:255,unit:'g',type:'Vorrat'},
+{id:'wok750',name:'REWE Beste Wahl Wok-Mix',pack:750,unit:'g',type:'frisch'},
+{id:'riceJ1k',name:'ja! Jasmin Reis',pack:1000,unit:'g',type:'Vorrat'},
+{id:'riceP1k',name:'ja! Parboiled Spitzenreis',pack:1000,unit:'g',type:'Vorrat'},
+{id:'riceExpress250',name:'REWE Beste Wahl Express Basmatireis',pack:250,unit:'g',type:'Vorrat'},
+{id:'corn285',name:'ja! Super Sweet Gemüsemais',pack:285,unit:'g',type:'Vorrat'},
+{id:'tomato400',name:'ja! Tomaten fein gehackt',pack:400,unit:'g',type:'Vorrat'},
+{id:'fusilli500',name:'ja! Fusilli',pack:500,unit:'g',type:'Vorrat'},
+{id:'coconut250',name:'REWE Beste Wahl Kokosnussmilch Creme',pack:250,unit:'ml',type:'Vorrat'},
+{id:'feta250',name:'ja! Hirtenkäse',pack:250,unit:'g',type:'Kühlschrank'},
+{id:'eggs10',name:'ja! Frische Eier',pack:10,unit:'Stück',type:'Kühlschrank'},
+{id:'peas280',name:'ja! Erbsen sehr fein',pack:280,unit:'g',type:'Vorrat'},
+{id:'peasCarrots265',name:'ja! Erbsen mit Möhren',pack:265,unit:'g',type:'Vorrat'},
+{id:'oil1l',name:'ja! Sonnenblumenöl',pack:1000,unit:'ml',type:'Vorrat'},
+{id:'onion1k',name:'Speisezwiebeln im Netz',pack:1000,unit:'g',type:'Vorrat'},
+{id:'garlic',name:'Knoblauch',pack:1,unit:'Stück',type:'Vorrat'},
+{id:'flour1k',name:'ja! Weizenmehl Type 405',pack:1000,unit:'g',type:'Vorrat'},
+{id:'crumbs400',name:'Leimer Semmelbrösel',pack:400,unit:'g',type:'Vorrat'},
+{id:'mayo500',name:'ja! Delikatess-Mayonnaise',pack:500,unit:'ml',type:'Kühlschrank'},
+{id:'bbq220',name:'Heinz Barbecue Sauce',pack:220,unit:'ml',type:'Kühlschrank'},
+{id:'pickles370',name:'Hengstenberg Salz-Dill-Gurken',pack:370,unit:'g',type:'Kühlschrank'},
+{id:'cream200',name:'ja! H-Schlagsahne',pack:200,unit:'g',type:'Vorrat'},
+{id:'milk1l',name:'ja! H-Vollmilch 3,5%',pack:1000,unit:'ml',type:'Vorrat'},
+{id:'peanuts200',name:'ja! Erdnüsse geröstet & gesalzen',pack:200,unit:'g',type:'Vorrat'},
+{id:'fries1k',name:'ja! Pommes Frites',pack:1000,unit:'g',type:'TK'},
+{id:'paella750',name:'ja! Paella Pfanne',pack:750,unit:'g',type:'TK'},
+{id:'frik500',name:'ja! Mini-Geflügelfrikadellen',pack:500,unit:'g',type:'Kühlschrank'},
+{id:'ciabatta300',name:'Ciabatta',pack:300,unit:'g',type:'frisch'},
+{id:'polenta500',name:'Polenta',pack:500,unit:'g',type:'Vorrat'},
+{id:'skyr500',name:'Skyr natur',pack:500,unit:'g',type:'Kühlschrank'},
+{id:'oats500',name:'Haferflocken',pack:500,unit:'g',type:'Vorrat'},
+{id:'apple1',name:'Apfel',pack:1,unit:'Stück',type:'frisch'},
+{id:'banana1',name:'Banane',pack:1,unit:'Stück',type:'frisch'},
+{id:'berries300',name:'Beeren',pack:300,unit:'g',type:'frisch/TK'},
+{id:'walnuts200',name:'Walnüsse',pack:200,unit:'g',type:'Vorrat'},
+{id:'wholebread500',name:'Vollkornbrot',pack:500,unit:'g',type:'frisch'},
+{id:'cottage200',name:'Hüttenkäse',pack:200,unit:'g',type:'Kühlschrank'},
+{id:'tomato1',name:'Tomate',pack:1,unit:'Stück',type:'frisch'},
+{id:'cucumber1',name:'Gurke',pack:1,unit:'Stück',type:'frisch'},
+{id:'pepper1',name:'Paprika',pack:1,unit:'Stück',type:'frisch'},
+{id:'yogurt500',name:'Naturjoghurt',pack:500,unit:'g',type:'Kühlschrank'}
+];
+let customProducts=JSON.parse(localStorage.customProducts||'[]');
+function productsAll(){return [...baseProducts,...customProducts]}
+let inventory=JSON.parse(localStorage.inventoryV2||'{}');
+function germanyNow(){
+  const parts=new Intl.DateTimeFormat('de-DE',{
+    timeZone:'Europe/Berlin',
+    weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false
+  }).formatToParts(new Date());
+  const get=t=>parts.find(x=>x.type===t)?.value||'';
+  const map={Mo:0,Di:1,Mi:2,Do:3,Fr:4,Sa:5,So:6};
+  return {day:map[get('weekday')] ?? 0,time:get('hour')+':'+get('minute'),hour:+get('hour')};
+}
+const nowDE=germanyNow();
+let selected=(localStorage.selectedDayV2!==undefined)?+localStorage.selectedDayV2:nowDE.day;
+if(localStorage.selectedDayV2===undefined && nowDE.hour>=19) selected=(nowDE.day+1)%7;
+let checked=JSON.parse(localStorage.checkedV2||'{}');
+
+const meals=[
+{day:'Montag',name:'Asia-Hähnchen-Wok',kcal:700,time:'20 Min.',device:'Wok + Topf',
+needs:[['chicken600',200],['wok750',300],['riceJ1k',75]],extras:['Sojasauce','Ingwer'],
+steps:['75 g Reis kochen.','200 g Hähnchen in Streifen schneiden und im Wok anbraten.','300 g Wok-Gemüse dazugeben und bissfest braten.','Mit Sojasauce und Ingwer abschmecken.']},
+{day:'Dienstag',name:'Hähnchen-Souvlaki mit Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
+needs:[['chicken600',200],['fries1k',250]],extras:['Gurke','Naturjoghurt','Tomaten','Zitrone','Oregano'],
+steps:['250 g Pommes/Wedges in Zone 1 knusprig garen.','200 g Hähnchen würzen und in Zone 2 vollständig durchgaren.','Joghurt, Gurke, Knoblauch und Zitrone zu Tzatziki verrühren.','Mit Tomaten servieren.']},
+{day:'Mittwoch',name:'Garnelen-Gemüse-Reis-Wok',kcal:650,time:'15 Min.',device:'Wok',
+needs:[['prawns225',225],['wok750',300],['riceExpress250',125]],extras:['Sojasauce','Knoblauch'],
+steps:['Garnelen nach Packungsangabe vorbereiten.','300 g Wok-Mix kräftig anbraten.','Garnelen dazugeben und vollständig erhitzen.','125 g Expressreis und Sojasauce unterheben.']},
+{day:'Donnerstag',name:'Chili mit Bohnen & Mais',kcal:690,time:'20 Min.',device:'Topf',
+needs:[['kidney255',255],['corn285',140],['tomato400',400],['riceP1k',70]],extras:['Mageres Rinderhack oder vegane Alternative','Zwiebel','Chili','Paprikapulver'],
+steps:['70 g Reis kochen.','Zwiebel und Proteinquelle anbraten.','Tomaten, Kidneybohnen und Mais dazugeben.','Würzen und 10 Minuten köcheln lassen.']},
+{day:'Freitag',name:'Rotes Thai-Hähnchen-Curry',kcal:730,time:'20 Min.',device:'Wok + Topf',
+needs:[['chicken600',200],['wok750',300],['coconut250',125],['riceJ1k',75]],extras:['Rote Currypaste','Knoblauch'],
+steps:['75 g Reis kochen.','200 g Hähnchen anbraten, Currypaste kurz mitrösten.','300 g Gemüse und 125 ml Kokosmilch dazugeben.','8–10 Minuten köcheln lassen.']},
+{day:'Samstag',name:'Polenta-Bowl mediterran',kcal:680,time:'20 Min.',device:'Topf + Pfanne',
+needs:[['polenta500',80],['tomato400',200],['feta250',60]],extras:['Zucchini oder Paprika','Kräuter'],
+steps:['80 g Polenta nach Packungsangabe garen.','Gemüse in der Pfanne anbraten.','200 g Tomaten dazugeben und würzen.','Mit 60 g Hirtenkäse auf der Polenta servieren.']},
+{day:'Sonntag',name:'Schnelle Paella + Salat',kcal:700,time:'15 Min.',device:'Pfanne',
+needs:[['paella750',375]],extras:['Großer gemischter Salat','Zitrone'],
+steps:['375 g Paella in der Pfanne nach Packungsangabe vollständig erhitzen.','Währenddessen einen großen Salat zubereiten.','Mit Zitrone abschmecken und zusammen servieren.']}
+];
+
+
+const dayMeals=[
+ {breakfast:{name:'Skyr-Bowl mit Haferflocken & Apfel',kcal:360,time:'5 Min.',items:['250 g Skyr','40 g Haferflocken','1 Apfel','15 g Walnüsse']},
+  dinner:{name:'Vollkornbrot mit Hüttenkäse & Gemüse',kcal:430,time:'5 Min.',items:['2 Scheiben Vollkornbrot','150 g Hüttenkäse','Tomate','Gurke']}},
+ {breakfast:{name:'Vollkornbrot mit Ei & Tomate',kcal:380,time:'10 Min.',items:['2 Scheiben Vollkornbrot','2 Eier','Tomate']},
+  dinner:{name:'Skyr mit Beeren & Nüssen',kcal:390,time:'5 Min.',items:['250 g Skyr','150 g Beeren','15 g Nüsse']}},
+ {breakfast:{name:'Skyr-Bowl mit Banane',kcal:380,time:'5 Min.',items:['250 g Skyr','40 g Haferflocken','1 Banane']},
+  dinner:{name:'Brotzeit mit Hirtenkäse & Gemüse',kcal:440,time:'5 Min.',items:['2 Scheiben Vollkornbrot','60 g Hirtenkäse','Paprika','Gurke']}},
+ {breakfast:{name:'Vollkornbrot mit Ei & Gurke',kcal:380,time:'10 Min.',items:['2 Scheiben Vollkornbrot','2 Eier','Gurke']},
+  dinner:{name:'Joghurt, Obst & Walnüsse',kcal:400,time:'5 Min.',items:['250 g Naturjoghurt/Skyr','1 Portion Obst','15 g Walnüsse']}},
+ {breakfast:{name:'Skyr-Bowl mit Beeren',kcal:350,time:'5 Min.',items:['250 g Skyr','40 g Haferflocken','150 g Beeren']},
+  dinner:{name:'Vollkornbrot mit Hüttenkäse & Paprika',kcal:430,time:'5 Min.',items:['2 Scheiben Vollkornbrot','150 g Hüttenkäse','Paprika']}},
+ {breakfast:{name:'Gemüse-Omelett mit Vollkornbrot',kcal:450,time:'12 Min.',items:['2 Eier','Gemüse nach Wahl','2 Scheiben Vollkornbrot']},
+  dinner:{name:'Leichtes Abendessen nach Hunger',kcal:300,time:'5 Min.',items:['Skyr oder Joghurt','1 Portion Obst']}},
+ {breakfast:{name:'Spätes Frühstück mit Ei',kcal:450,time:'10 Min.',items:['2 Eier','2 Scheiben Vollkornbrot','Tomate','Gurke']},
+  dinner:{name:'Kleine Brotzeit oder Reste',kcal:350,time:'5 Min.',items:['Vollkornbrot oder passende Reste','Gemüse dazu']}}
+];
+
+
+const lightMealNeeds=[
+ {breakfast:[['skyr500',250],['oats500',40],['apple1',1],['walnuts200',15]],dinner:[['wholebread500',100],['cottage200',150],['tomato1',1],['cucumber1',1]]},
+ {breakfast:[['wholebread500',100],['eggs10',2],['tomato1',1]],dinner:[['skyr500',250],['berries300',150],['walnuts200',15]]},
+ {breakfast:[['skyr500',250],['oats500',40],['banana1',1]],dinner:[['wholebread500',100],['feta250',60],['pepper1',1],['cucumber1',1]]},
+ {breakfast:[['wholebread500',100],['eggs10',2],['cucumber1',1]],dinner:[['yogurt500',250],['apple1',1],['walnuts200',15]]},
+ {breakfast:[['skyr500',250],['oats500',40],['berries300',150]],dinner:[['wholebread500',100],['cottage200',150],['pepper1',1]]},
+ {breakfast:[['eggs10',2],['pepper1',1],['wholebread500',100]],dinner:[['skyr500',250],['apple1',1]]},
+ {breakfast:[['eggs10',2],['wholebread500',100],['tomato1',1],['cucumber1',1]],dinner:[['wholebread500',80],['cucumber1',1]]}
+];
+
+function P(id){return productsAll().find(x=>x.id===id)}
+function have(id){return +(inventory[id]||0)}
+function fmt(n){return Math.round(n*10)/10}
+function packCount(id,needed){let p=P(id), missing=Math.max(0,needed-have(id)); return missing?Math.ceil(missing/p.pack):0}
+
+function shoppingForDay(dayIndex){
+ const req={};
+ const add=(id,n)=>req[id]=(req[id]||0)+n;
+ lightMealNeeds[dayIndex].breakfast.forEach(([id,n])=>add(id,n));
+ meals[dayIndex].needs.forEach(([id,n])=>add(id,n));
+ lightMealNeeds[dayIndex].dinner.forEach(([id,n])=>add(id,n));
+ const arr=[];
+ Object.entries(req).forEach(([id,need])=>{
+   const p=P(id), h=have(id), missing=Math.max(0,need-h);
+   if(missing>0){
+     const packs=Math.ceil(missing/p.pack);
+     arr.push({id,name:p.name,text:`${packs} × ${p.pack} ${p.unit}`,need,missing,packs,rest:fmt(packs*p.pack-missing)});
+   }
+ });
+ // Extras from lunch remain visible as "nach Bedarf".
+ meals[dayIndex].extras.forEach(x=>arr.push({id:'extra:'+x,name:x,text:'nach Bedarf',extra:true}));
+ return arr;
+}
+function shoppingFor(m){
+ let arr=[];
+ m.needs.forEach(([id,need])=>{let p=P(id),h=have(id),missing=Math.max(0,need-h),packs=packCount(id,need);
+   if(missing>0) arr.push({id,name:p.name,text:`${packs} × ${p.pack} ${p.unit}`,need,missing,packs,rest:fmt(packs*p.pack-missing)});
+ });
+ m.extras.forEach(x=>arr.push({id:'extra:'+x,name:x,text:'nach Bedarf',extra:true}));
+ return arr;
+}
+function nav(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.v===v));document.getElementById(v).classList.add('active');render()}
+tabs.onclick=e=>{if(e.target.dataset.v)nav(e.target.dataset.v)}
+function selectDay(i){selected=i;localStorage.selectedDayV2=i;nav('today')}
+function addInv(id,amount){inventory[id]=Math.max(0,fmt(have(id)+(+amount||0)));localStorage.inventoryV2=JSON.stringify(inventory);render()}
+function setInv(id,amount){inventory[id]=Math.max(0,+amount||0);localStorage.inventoryV2=JSON.stringify(inventory);render()}
+function buyItem(id,packs){let p=P(id);addInv(id,p.pack*packs)}
+function useMeal(){
+ let m=meals[selected]; m.needs.forEach(([id,n])=>setInv(id,Math.max(0,have(id)-n))); alert('Verbrauch wurde aus dem Vorrat abgezogen. Restmengen kannst du im Vorrat korrigieren.');
+}
+function toggleCheck(k,v){checked[k]=v;localStorage.checkedV2=JSON.stringify(checked)}
+function addProduct(){
+ let name=document.getElementById('pn').value.trim(),pack=+document.getElementById('pp').value,unit=document.getElementById('pu').value,type=document.getElementById('pt').value;
+ if(!name||!pack)return alert('Bitte Produktname und Packungsgröße eingeben.');
+ let id='custom'+Date.now();customProducts.push({id,name,pack,unit,type});localStorage.customProducts=JSON.stringify(customProducts);render();
+}
+function render(){
+ const n=germanyNow();
+ const todayName=meals[n.day].day;
+ const planLabel=(selected===n.day?'Heute':selected===(n.day+1)%7?'Morgen':meals[selected].day);
+ document.getElementById('clockline').textContent=`Deutschland · ${todayName}, ${n.time} Uhr · Planung: ${planLabel}`;
+ let m=meals[selected], shoplist=shoppingForDay(selected);
+ const dm=dayMeals[selected];
+ const dayTotal=dm.breakfast.kcal+m.kcal+dm.dinner.kcal;
+ today.innerHTML=`<div class="card hero"><div class="muted">${m.day} · Tagesplan</div><h2>≈ ${dayTotal} kcal geplant</h2><span class="badge">Frühstück</span><span class="badge">Hauptmahlzeit</span><span class="badge">Abendessen</span></div>
+ <div class="card"><div class="tiny muted">VORMITTAG / FRÜHSTÜCK</div><h3>${dm.breakfast.name}</h3><div><span class="badge">≈ ${dm.breakfast.kcal} kcal</span><span class="badge">⏱ ${dm.breakfast.time}</span></div><p class="small">${dm.breakfast.items.join(' · ')}</p></div>
+ <div class="card"><div class="tiny muted">CA. 15 UHR · HAUPTMAHLZEIT</div><h3>${m.name}</h3><div><span class="badge">≈ ${m.kcal} kcal</span><span class="badge">⏱ ${m.time}</span><span class="badge">${m.device}</span></div></div>
+ <div class="card"><div class="tiny muted">ABENDS</div><h3>${dm.dinner.name}</h3><div><span class="badge">≈ ${dm.dinner.kcal} kcal</span><span class="badge">⏱ ${dm.dinner.time}</span></div><p class="small">${dm.dinner.items.join(' · ')}</p></div>
+ <div class="card"><h3>Für den ganzen Tag kaufen</h3>${shoplist.slice(0,5).map(x=>`<div class="item"><strong>${x.name}</strong><span class="qty">${x.text}</span>${x.rest>0?`<div class="tiny muted">Rechnerischer Packungsrest nach dem Rezept: ${x.rest} ${P(x.id).unit}</div>`:''}</div>`).join('')||'<p>Die Hauptzutaten sind bereits im Vorrat.</p>'}
+ <button class="btn" onclick="nav('shop')">🛒 Einkauf öffnen</button><button class="btn alt" onclick="nav('cook')">👨‍🍳 Jetzt kochen</button></div>
+ ${n.hour>=19 && selected===n.day?`<div class="notice small"><strong>Für heute ist es schon spät.</strong> Der heutige Plan bleibt erreichbar. Für deinen normalen Einkauf kannst du direkt morgen öffnen.<button class="btn alt" onclick="selectDay(${(n.day+1)%7})">Morgen (${meals[(n.day+1)%7].day}) planen</button></div>`:''}
+ <div class="notice small">Die App rechnet mit echten Packungsgrößen. Nach dem Kochen bestätigst du den Verbrauch; Restmengen kannst du im Vorrat jederzeit korrigieren.</div>`;
+ shop.innerHTML=`<div class="card"><h2>🛒 ${m.day} bei REWE</h2><p class="muted">Frühstück + Hauptmahlzeit + Abendessen. Vorrat wird automatisch berücksichtigt.</p>${shoplist.map((x,i)=>`<label class="check"><input type="checkbox" ${checked[m.day+i]?'checked':''} onchange="toggleCheck('${m.day+i}',this.checked)"><span><strong>${x.name}</strong><br><span class="small">${x.text}${x.missing?` · Rezept benötigt noch ${x.missing} ${P(x.id).unit}`:''}</span>${!x.extra?`<br><button type="button" class="btn small alt" onclick="event.preventDefault();buyItem('${x.id}',${x.packs})">Als gekauft einbuchen</button>`:''}</span></label>`).join('')||'<p>Für die hinterlegten Hauptzutaten musst du nichts kaufen.</p>'}</div>`;
+ cook.innerHTML=`<div class="card"><span class="badge">${m.device}</span><h2>${m.name}</h2>${m.steps.map((s,i)=>`<div class="step"><div class="num">${i+1}</div><div>${s}</div></div>`).join('')}<button class="btn" onclick="useMeal()">✓ Gericht gekocht – Zutaten verbrauchen</button></div>`;
+ week.innerHTML=`<div class="card"><h2>Wochenplan</h2>${meals.map((x,i)=>{const d=dayMeals[i];return `<div class="product day" onclick="selectDay(${i})"><span class="tiny muted">${x.day}</span><strong>🥣 ${d.breakfast.name}</strong><div class="small">🍽️ ${x.name}</div><div class="small">🌙 ${d.dinner.name}</div><div class="tiny muted" style="margin-top:5px">≈ ${d.breakfast.kcal+x.kcal+d.dinner.kcal} kcal gesamt</div></div>`}).join('')}</div>`;
+ stock.innerHTML=`<div class="card"><h2>🏠 Mein Vorrat</h2><p class="muted">Hier zählt die tatsächlich noch vorhandene Menge.</p>${productsAll().map(p=>`<div class="product"><div class="between row"><div><strong>${p.name}</strong><div class="tiny muted">${p.type} · Packung ${p.pack} ${p.unit}</div></div><span class="pill">${fmt(have(p.id))} ${p.unit}</span></div><div class="grid2" style="margin-top:9px"><button class="btn alt" onclick="addInv('${p.id}',${p.pack})">+ 1 Packung</button><input inputmode="decimal" value="${fmt(have(p.id))}" onchange="setInv('${p.id}',this.value)" aria-label="Bestand"></div></div>`).join('')}</div>`;
+ products.innerHTML=`<div class="card"><h2>❤️ Meine Produkte</h2><p class="muted">Startbestand aus deinen REWE-Favoriten. Fehlende Produkte kannst du jederzeit ergänzen.</p>${productsAll().map(p=>`<div class="item"><strong>${p.name}</strong><span class="small">${p.pack} ${p.unit} · ${p.type}</span></div>`).join('')}</div>
+ <div class="card"><h3>➕ Produkt hinzufügen</h3><input id="pn" placeholder="z. B. Polenta"><div class="grid2" style="margin-top:8px"><input id="pp" type="number" placeholder="Packungsgröße"><select id="pu"><option>g</option><option>ml</option><option>Stück</option></select></div><select id="pt" style="margin-top:8px"><option>Vorrat</option><option>Kühlschrank</option><option>TK</option><option>frisch</option></select><button class="btn" onclick="addProduct()">Produkt speichern</button></div>`;
+}
+render();
+</script></body></html>
