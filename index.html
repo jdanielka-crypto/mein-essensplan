@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.4</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.5</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -39,7 +39,7 @@ footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;back
 <main>
 <section id="today" class="view active"></section><section id="shop" class="view"></section><section id="cook" class="view"></section>
 <section id="week" class="view"></section><section id="stock" class="view"></section><section id="products" class="view"></section>
-</main><footer>Version 2.4 · Tages-Einkauf · Cloud-Synchronisierung + lokaler Offline-Speicher</footer>
+</main><footer>Version 2.5 · echte Rezeptgrundlagen · Cloud-Synchronisierung + lokaler Offline-Speicher</footer>
 <script>
 const baseProducts=[
 {id:'chicken600',name:'ja! Hähnchen-Brustfilet',pack:600,unit:'g',type:'frisch'},
@@ -170,27 +170,34 @@ if(localStorage.selectedDayV2===undefined && nowDE.hour>=19) selected=(nowDE.day
 let checked=JSON.parse(localStorage.checkedV2||'{}');
 
 const meals=[
-{day:'Montag',name:'Asia-Hähnchen-Wok',kcal:700,time:'20 Min.',device:'Wok + Topf',
-needs:[['chicken600',200],['wok750',300],['riceJ1k',75]],extras:['Sojasauce','Ingwer'],
-steps:['75 g Reis kochen.','200 g Hähnchen in Streifen schneiden und im Wok anbraten.','300 g Wok-Gemüse dazugeben und bissfest braten.','Mit Sojasauce und Ingwer abschmecken.']},
-{day:'Dienstag',name:'Hähnchen-Souvlaki mit Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
-needs:[['chicken600',200],['fries1k',250]],extras:['Gurke','Naturjoghurt','Tomaten','Zitrone','Oregano'],
-steps:['250 g Pommes/Wedges in Zone 1 knusprig garen.','200 g Hähnchen würzen und in Zone 2 vollständig durchgaren.','Joghurt, Gurke, Knoblauch und Zitrone zu Tzatziki verrühren.','Mit Tomaten servieren.']},
-{day:'Mittwoch',name:'Garnelen-Gemüse-Reis-Wok',kcal:650,time:'15 Min.',device:'Wok',
-needs:[['prawns225',225],['wok750',300],['riceExpress250',125]],extras:['Sojasauce','Knoblauch'],
-steps:['Garnelen nach Packungsangabe vorbereiten.','300 g Wok-Mix kräftig anbraten.','Garnelen dazugeben und vollständig erhitzen.','125 g Expressreis und Sojasauce unterheben.']},
-{day:'Donnerstag',name:'Chili mit Bohnen & Mais',kcal:690,time:'20 Min.',device:'Topf',
-needs:[['kidney255',255],['corn285',140],['tomato400',400],['riceP1k',70]],extras:['Mageres Rinderhack oder vegane Alternative','Zwiebel','Chili','Paprikapulver'],
-steps:['70 g Reis kochen.','Zwiebel und Proteinquelle anbraten.','Tomaten, Kidneybohnen und Mais dazugeben.','Würzen und 10 Minuten köcheln lassen.']},
-{day:'Freitag',name:'Rotes Thai-Hähnchen-Curry',kcal:730,time:'20 Min.',device:'Wok + Topf',
-needs:[['chicken600',200],['wok750',300],['coconut250',125],['riceJ1k',75]],extras:['Rote Currypaste','Knoblauch'],
-steps:['75 g Reis kochen.','200 g Hähnchen anbraten, Currypaste kurz mitrösten.','300 g Gemüse und 125 ml Kokosmilch dazugeben.','8–10 Minuten köcheln lassen.']},
-{day:'Samstag',name:'Polenta-Bowl mediterran',kcal:680,time:'20 Min.',device:'Topf + Pfanne',
-needs:[['polenta500',80],['tomato400',200],['feta250',60]],extras:['Zucchini oder Paprika','Kräuter'],
-steps:['80 g Polenta nach Packungsangabe garen.','Gemüse in der Pfanne anbraten.','200 g Tomaten dazugeben und würzen.','Mit 60 g Hirtenkäse auf der Polenta servieren.']},
-{day:'Sonntag',name:'Schnelle Paella + Salat',kcal:700,time:'15 Min.',device:'Pfanne',
-needs:[['paella750',375]],extras:['Großer gemischter Salat','Zitrone'],
-steps:['375 g Paella in der Pfanne nach Packungsangabe vollständig erhitzen.','Währenddessen einen großen Salat zubereiten.','Mit Zitrone abschmecken und zusammen servieren.']}
+{day:'Montag',name:'Teriyaki-Hähnchen mit Brokkoli & Reis',kcal:700,time:'20 Min.',device:'Wok + Topf',
+source:'Chef De Home',sourceUrl:'https://www.chefdehome.com/recipes/948/teriyaki-chicken',
+needs:[['chicken600',200],['riceJ1k',75]],extras:['Brokkoli','Sojasauce, natriumreduziert','Reisessig','Ingwer','Knoblauch','Sesamöl','Speisestärke','etwas Zucker oder Honig','Frühlingszwiebel'],
+steps:['75 g Reis kochen.','Sauce aus Sojasauce, Reisessig, Ingwer, Knoblauch, wenig Süße und Speisestärke anrühren.','200 g Hähnchen im sehr heißen Wok kräftig anbraten.','Sauce zugeben und kurz einkochen, bis sie glänzend am Hähnchen haftet.','Brokkoli kurz mitgaren, sodass er bissfest bleibt. Mit wenig Sesamöl und Frühlingszwiebel abschließen.']},
+{day:'Dienstag',name:'Griechisches Hähnchen-Souvlaki mit Tzatziki & Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
+source:'The Mediterranean Dish',sourceUrl:'https://www.themediterraneandish.com/greek-chicken-souvlaki-recipe-tzatziki/',
+needs:[['chicken600',200],['fries1k',250],['yogurt500',150],['cucumber1',1]],extras:['Zitrone','Knoblauch','Oregano','Rosmarin','Paprikapulver','Olivenöl','Tomate'],
+steps:['Hähnchen mit Zitronensaft, Knoblauch, Oregano, Rosmarin, Paprika, Pfeffer und wenig Olivenöl marinieren.','250 g Wedges in Zone 1 knusprig garen.','Hähnchen in Zone 2 vollständig garen und leicht bräunen.','Aus Joghurt, geriebener Gurke, Knoblauch und Zitrone Tzatziki rühren.','Mit Tomate und Tzatziki servieren.']},
+{day:'Mittwoch',name:'Garnelen-Gemüse-Stir-Fry mit Reis',kcal:650,time:'20 Min.',device:'Wok + Topf',
+source:'Damn Delicious',sourceUrl:'https://damndelicious.net/2015/01/16/easy-shrimp-broccoli-stir-fry/',
+needs:[['prawns225',225],['wok750',300],['riceJ1k',70]],extras:['Sojasauce, natriumreduziert','Austernsauce','Reisessig','Ingwer','Knoblauch','Sesamöl','Speisestärke','Sriracha optional'],
+steps:['70 g Reis kochen.','Sauce aus Sojasauce, Austernsauce, Reisessig, Ingwer, Knoblauch, Sesamöl und etwas Speisestärke anrühren.','Wok sehr heiß werden lassen und Gemüse kräftig anbraten.','Garnelen dazugeben und nur so lange braten, bis sie gar sind.','Sauce einrühren und kurz eindicken lassen. Mit Reis servieren.']},
+{day:'Donnerstag',name:'Chili con Carne mit Bohnen',kcal:690,time:'35 Min.',device:'Topf',
+source:'Plain Chicken',sourceUrl:'https://www.plainchicken.com/lunch-lady-chili-con-carne/',
+needs:[['kidney255',255],['tomato400',400],['corn285',100],['riceP1k',60]],extras:['Mageres Rinderhack','Zwiebel','Tomatenmark','Knoblauch','Chilipulver','Kreuzkümmel','Paprikapulver','Pfeffer'],
+steps:['60 g Reis kochen.','Zwiebel und mageres Hack kräftig anbraten.','Knoblauch, Chili, Kreuzkümmel und Paprika kurz mitrösten.','Tomaten, Tomatenmark, Kidneybohnen und etwas Mais zugeben.','Etwa 15–20 Minuten köcheln lassen und abschmecken. Mit Reis servieren.']},
+{day:'Freitag',name:'Rotes Thai-Hähnchen-Curry mit Jasminreis',kcal:730,time:'25 Min.',device:'Wok + Topf',
+source:'Modern Honey',sourceUrl:'https://www.modernhoney.com/thai-red-chicken-curry/',
+needs:[['chicken600',200],['wok750',300],['coconut250',125],['riceJ1k',75]],extras:['Rote Currypaste','Zwiebel','Knoblauch','Limette','Fischsauce optional','Thai-Basilikum oder Koriander','etwas Zucker oder Honig'],
+steps:['75 g Jasminreis kochen.','Zwiebel und Knoblauch anschwitzen, rote Currypaste kurz mitrösten.','200 g Hähnchen zugeben und anbraten.','300 g Gemüse und 125 ml Kokosmilch zugeben und sanft köcheln, bis das Hähnchen gar ist.','Mit Limette, wenig Süße und optional Fischsauce abschmecken. Mit Kräutern servieren.']},
+{day:'Samstag',name:'Mediterrane Polenta mit Gemüse & Hirtenkäse',kcal:680,time:'25 Min.',device:'Topf + Pfanne',
+source:'eigene Variante auf Basis klassischer cremiger Polenta',sourceUrl:'',
+needs:[['polenta500',80],['tomato400',200],['feta250',60]],extras:['Zucchini','Paprika','Knoblauch','Olivenöl','Oregano oder italienische Kräuter','Gemüsebrühe'],
+steps:['Polenta in Gemüsebrühe nach Packungsangabe cremig garen.','Zucchini und Paprika in wenig Olivenöl kräftig anbraten.','Knoblauch und Tomaten zugeben, würzen und einige Minuten einkochen.','Gemüse auf die Polenta geben und 60 g Hirtenkäse darüberbröseln.']},
+{day:'Sonntag',name:'Schnelle Paella mit großem Zitronen-Salat',kcal:700,time:'15 Min.',device:'Pfanne',
+source:'ja! Paella als schnelle Vorratsoption',sourceUrl:'',
+needs:[['paella750',375]],extras:['Blattsalat','Tomate','Gurke','Zitrone','Olivenöl'],
+steps:['375 g Paella nach Packungsangabe in einer großen Pfanne vollständig erhitzen.','Salat, Tomate und Gurke vorbereiten.','Aus Zitrone, wenig Olivenöl und Pfeffer ein schnelles Dressing rühren.','Paella mit dem großen frischen Salat servieren.']}
 ];
 
 
