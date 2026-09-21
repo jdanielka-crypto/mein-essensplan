@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.3</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.4</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -58,6 +58,7 @@ const baseProducts=[
 {id:'peas280',name:'ja! Erbsen sehr fein',pack:280,unit:'g',type:'Vorrat'},
 {id:'peasCarrots265',name:'ja! Erbsen mit Möhren',pack:265,unit:'g',type:'Vorrat'},
 {id:'oil1l',name:'ja! Sonnenblumenöl',pack:1000,unit:'ml',type:'Vorrat'},
+{id:'sesame500',name:'Brändle vita Sesamöl kaltgepresst',brand:'Brändle',pack:500,unit:'ml',type:'Vorrat',articleNumber:'5305756',verifiedAt:'2026-09-22',nutrition:{kcal:828,fat:92,satfat:12,carbs:0,sugar:0,fiber:null,protein:0,salt:0}},
 {id:'onion1k',name:'Speisezwiebeln im Netz',pack:1000,unit:'g',type:'Vorrat'},
 {id:'garlic',name:'Knoblauch',pack:1,unit:'Stück',type:'Vorrat'},
 {id:'flour1k',name:'ja! Weizenmehl Type 405',pack:1000,unit:'g',type:'Vorrat'},
@@ -173,7 +174,7 @@ let checked=JSON.parse(localStorage.checkedV2||'{}');
 const meals=[
 {day:'Montag',name:'Teriyaki-Hähnchen mit Brokkoli & Reis',kcal:700,time:'20 Min.',device:'Wok + Topf',
 source:'Chef De Home',sourceUrl:'https://www.chefdehome.com/recipes/948/teriyaki-chicken',
-needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['Brokkoli','150 g'],['Sojasauce, natriumreduziert','25 ml'],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['Sesamöl','5 ml'],['Zucker oder Honig','10 g'],['Frühlingszwiebel','1 Stück']],
+needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['Brokkoli','150 g'],['Sojasauce, natriumreduziert','25 ml'],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['Zucker oder Honig','10 g'],['Frühlingszwiebel','1 Stück']],
 steps:['75 g Reis kochen.','Sauce aus Sojasauce, Reisessig, Ingwer, Knoblauch, wenig Süße und Speisestärke anrühren.','200 g Hähnchen im sehr heißen Wok kräftig anbraten.','Sauce zugeben und kurz einkochen, bis sie glänzend am Hähnchen haftet.','Brokkoli kurz mitgaren, sodass er bissfest bleibt. Mit wenig Sesamöl und Frühlingszwiebel abschließen.']},
 {day:'Dienstag',name:'Griechisches Hähnchen-Souvlaki mit Tzatziki & Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
 source:'The Mediterranean Dish',sourceUrl:'https://www.themediterraneandish.com/greek-chicken-souvlaki-recipe-tzatziki/',
