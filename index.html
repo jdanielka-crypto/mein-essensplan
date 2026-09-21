@@ -20,6 +20,14 @@ input,select{width:100%;border:1px solid #d8ddd9;border-radius:12px;padding:11px
 .product{border:1px solid #edf0ed;border-radius:16px;padding:13px;margin:9px 0}.product .qty{font-weight:800;color:var(--green)}
 .notice{background:var(--warn);border-radius:14px;padding:11px;margin:10px 0}.pill{border-radius:999px;background:#eef3ef;padding:5px 8px;font-size:12px}
 footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;background:#f4f6f1;color:var(--muted);font-size:12px}
+@media(max-width:600px){
+ header{padding:20px 20px 8px}
+ .tabs{position:static;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:10px 18px 12px;overflow:visible}
+ .tabs button{width:100%;padding:12px 6px;font-size:15px;text-align:center}
+ main{padding-left:14px;padding-right:14px}
+ #cloudbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+ #cloudstatus{min-width:0;overflow-wrap:anywhere}
+}
 </style></head><body>
 <header><h1>🍽️ Mein Essensplan</h1><p>Deine Produkte · kleine Einkäufe · echte Packungsgrößen</p>
 <p id="clockline" class="small"></p>
