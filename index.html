@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.4</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.5</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -62,6 +62,7 @@ const baseProducts=[
 {id:'onion1k',name:'Speisezwiebeln im Netz',pack:1000,unit:'g',type:'Vorrat'},
 {id:'garlic',name:'Knoblauch',pack:1,unit:'Stück',type:'Vorrat'},
 {id:'flour1k',name:'ja! Weizenmehl Type 405',pack:1000,unit:'g',type:'Vorrat'},
+{id:'sugar1k',name:'ja! Raffinade-Zucker',brand:'ja!',pack:1000,unit:'g',type:'Vorrat',articleNumber:'5249473',verifiedAt:'2026-09-22',nutrition:{kcal:400,fat:0,satfat:0,carbs:100,sugar:100,fiber:0,protein:0,salt:0}},
 {id:'crumbs400',name:'Leimer Semmelbrösel',pack:400,unit:'g',type:'Vorrat'},
 {id:'starch400',name:'ja! Feine Speisestärke reine Maisstärke',pack:400,unit:'g',type:'Vorrat'},
 {id:'mayo500',name:'ja! Delikatess-Mayonnaise',pack:500,unit:'ml',type:'Kühlschrank'},
@@ -174,7 +175,7 @@ let checked=JSON.parse(localStorage.checkedV2||'{}');
 const meals=[
 {day:'Montag',name:'Teriyaki-Hähnchen mit Brokkoli & Reis',kcal:700,time:'20 Min.',device:'Wok + Topf',
 source:'Chef De Home',sourceUrl:'https://www.chefdehome.com/recipes/948/teriyaki-chicken',
-needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['Brokkoli','150 g'],['Sojasauce, natriumreduziert','25 ml'],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['Zucker oder Honig','10 g'],['Frühlingszwiebel','1 Stück']],
+needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['Brokkoli','150 g'],['Sojasauce, natriumreduziert','25 ml'],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['sugar1k',10],['Frühlingszwiebel','1 Stück']],
 steps:['75 g Reis kochen.','Sauce aus Sojasauce, Reisessig, Ingwer, Knoblauch, wenig Süße und Speisestärke anrühren.','200 g Hähnchen im sehr heißen Wok kräftig anbraten.','Sauce zugeben und kurz einkochen, bis sie glänzend am Hähnchen haftet.','Brokkoli kurz mitgaren, sodass er bissfest bleibt. Mit wenig Sesamöl und Frühlingszwiebel abschließen.']},
 {day:'Dienstag',name:'Griechisches Hähnchen-Souvlaki mit Tzatziki & Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
 source:'The Mediterranean Dish',sourceUrl:'https://www.themediterraneandish.com/greek-chicken-souvlaki-recipe-tzatziki/',
@@ -190,7 +191,7 @@ needs:[['kidney255',255],['tomato400',400],['corn285',100],['riceP1k',60]],extra
 steps:['60 g Reis kochen.','Zwiebel und mageres Hack kräftig anbraten.','Knoblauch, Chili, Kreuzkümmel und Paprika kurz mitrösten.','Tomaten, Tomatenmark, Kidneybohnen und etwas Mais zugeben.','Etwa 15–20 Minuten köcheln lassen und abschmecken. Mit Reis servieren.']},
 {day:'Freitag',name:'Rotes Thai-Hähnchen-Curry mit Jasminreis',kcal:730,time:'25 Min.',device:'Wok + Topf',
 source:'Modern Honey',sourceUrl:'https://www.modernhoney.com/thai-red-chicken-curry/',
-needs:[['chicken600',200],['wok750',300],['coconut250',125],['riceJ1k',75]],extras:[['Rote Currypaste','20 g'],['Zwiebel','½ Stück'],['Knoblauch','1 Zehe'],['Limette','½ Stück'],['Fischsauce','5 ml optional'],['Thai-Basilikum oder Koriander','10 g'],['Zucker oder Honig','5 g']],
+needs:[['chicken600',200],['wok750',300],['coconut250',125],['riceJ1k',75]],extras:[['Rote Currypaste','20 g'],['Zwiebel','½ Stück'],['Knoblauch','1 Zehe'],['Limette','½ Stück'],['Fischsauce','5 ml optional'],['Thai-Basilikum oder Koriander','10 g'],['sugar1k',5]],
 steps:['75 g Jasminreis kochen.','Zwiebel und Knoblauch anschwitzen, rote Currypaste kurz mitrösten.','200 g Hähnchen zugeben und anbraten.','300 g Gemüse und 125 ml Kokosmilch zugeben und sanft köcheln, bis das Hähnchen gar ist.','Mit Limette, wenig Süße und optional Fischsauce abschmecken. Mit Kräutern servieren.']},
 {day:'Samstag',name:'Mediterrane Polenta mit Gemüse & Hirtenkäse',kcal:680,time:'25 Min.',device:'Topf + Pfanne',
 source:'eigene Variante auf Basis klassischer cremiger Polenta',sourceUrl:'',
