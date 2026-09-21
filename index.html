@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.6</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.7</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -46,9 +46,13 @@ const baseProducts=[
 {id:'prawns225',name:'ja! King Prawns Garnelen',pack:225,unit:'g',type:'TK'},
 {id:'kidney255',name:'ja! Kidney-Bohnen rot',pack:255,unit:'g',type:'Vorrat'},
 {id:'wok750',name:'REWE Beste Wahl Wok-Mix',pack:750,unit:'g',type:'frisch'},
-{id:'riceJ1k',name:'ja! Jasmin Reis',pack:1000,unit:'g',type:'Vorrat'},
-{id:'riceP1k',name:'ja! Parboiled Spitzenreis',pack:1000,unit:'g',type:'Vorrat'},
-{id:'riceExpress250',name:'REWE Beste Wahl Express Basmatireis',pack:250,unit:'g',type:'Vorrat'},
+{id:'riceJ1k',name:'ja! Jasmin Reis',brand:'ja!',pack:1000,unit:'g',type:'Vorrat',articleNumber:'8350407',verifiedAt:'2026-09-22',nutrition:{kcal:351,fat:0.8,satfat:0.3,carbs:78.8,sugar:0.5,fiber:0.5,protein:6.9,salt:0.02}},
+{id:'riceP1k',name:'ja! Parboiled Spitzenreis Langkornreis',brand:'ja!',pack:1000,unit:'g',type:'Vorrat',articleNumber:'7227868',verifiedAt:'2026-09-22',nutrition:{kcal:351,fat:1.5,satfat:0.5,carbs:75.5,sugar:1,fiber:1.8,protein:8,salt:0.01}},
+{id:'riceExpress250',name:'REWE Beste Wahl Express Basmati Reis',brand:'REWE Beste Wahl',pack:250,unit:'g',type:'Vorrat',articleNumber:'7873673',verifiedAt:'2026-09-22',nutrition:{kcal:141,fat:1.8,satfat:0.2,carbs:27.7,sugar:0.1,fiber:1,protein:2.9,salt:0.2}},
+{id:'riceExpressLong250',name:'REWE Beste Wahl Langkorn Express Reis',brand:'REWE Beste Wahl',pack:250,unit:'g',type:'Vorrat',articleNumber:'8397907',verifiedAt:'2026-09-22',nutrition:{kcal:147,fat:2,satfat:0.3,carbs:29.2,sugar:0.1,fiber:0.5,protein:2.8,salt:0.18}},
+{id:'riceExpressOrient250',name:'REWE Beste Wahl Oriental Express Reis',brand:'REWE Beste Wahl',pack:250,unit:'g',type:'Vorrat',articleNumber:'8041769',verifiedAt:'2026-09-22',nutrition:{kcal:148,fat:2.5,satfat:0.4,carbs:25.6,sugar:0.6,fiber:2.3,protein:4.6,salt:0.6}},
+{id:'riceExpressCurry250',name:'REWE Beste Wahl Express Reis Curry',brand:'REWE Beste Wahl',pack:250,unit:'g',type:'Vorrat',articleNumber:'8957000',verifiedAt:'2026-09-22',nutrition:{kcal:154,fat:1.9,satfat:0.3,carbs:31,sugar:1.2,fiber:0.9,protein:2.7,salt:0.55}},
+{id:'riceBasmati1k',name:'ja! Basmati Reis',brand:'ja!',pack:1000,unit:'g',type:'Vorrat',articleNumber:'7087342',verifiedAt:'2026-09-22',nutrition:{kcal:352,fat:0.9,satfat:0.2,carbs:77,sugar:0.5,fiber:0.5,protein:8.6,salt:0.01}},
 {id:'corn285',name:'ja! Super Sweet Gemüsemais',pack:285,unit:'g',type:'Vorrat'},
 {id:'tomato400',name:'ja! Tomaten fein gehackt',pack:400,unit:'g',type:'Vorrat'},
 {id:'fusilli500',name:'ja! Fusilli',pack:500,unit:'g',type:'Vorrat'},
