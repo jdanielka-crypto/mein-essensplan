@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.5</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.6</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -39,7 +39,7 @@ footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;back
 <main>
 <section id="today" class="view active"></section><section id="shop" class="view"></section><section id="cook" class="view"></section>
 <section id="week" class="view"></section><section id="stock" class="view"></section><section id="products" class="view"></section>
-</main><footer>Version 2.5 · echte Rezeptgrundlagen · Cloud-Synchronisierung + lokaler Offline-Speicher</footer>
+</main><footer>Version 2.6 · fehlende Rezeptprodukte erkennen · Cloud-Synchronisierung + lokaler Offline-Speicher</footer>
 <script>
 const baseProducts=[
 {id:'chicken600',name:'ja! Hähnchen-Brustfilet',pack:600,unit:'g',type:'frisch'},
@@ -172,31 +172,31 @@ let checked=JSON.parse(localStorage.checkedV2||'{}');
 const meals=[
 {day:'Montag',name:'Teriyaki-Hähnchen mit Brokkoli & Reis',kcal:700,time:'20 Min.',device:'Wok + Topf',
 source:'Chef De Home',sourceUrl:'https://www.chefdehome.com/recipes/948/teriyaki-chicken',
-needs:[['chicken600',200],['riceJ1k',75]],extras:['Brokkoli','Sojasauce, natriumreduziert','Reisessig','Ingwer','Knoblauch','Sesamöl','Speisestärke','etwas Zucker oder Honig','Frühlingszwiebel'],
+needs:[['chicken600',200],['riceJ1k',75]],extras:[['Brokkoli','150 g'],['Sojasauce, natriumreduziert','25 ml'],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['Sesamöl','5 ml'],['Speisestärke','5 g'],['Zucker oder Honig','10 g'],['Frühlingszwiebel','1 Stück']],
 steps:['75 g Reis kochen.','Sauce aus Sojasauce, Reisessig, Ingwer, Knoblauch, wenig Süße und Speisestärke anrühren.','200 g Hähnchen im sehr heißen Wok kräftig anbraten.','Sauce zugeben und kurz einkochen, bis sie glänzend am Hähnchen haftet.','Brokkoli kurz mitgaren, sodass er bissfest bleibt. Mit wenig Sesamöl und Frühlingszwiebel abschließen.']},
 {day:'Dienstag',name:'Griechisches Hähnchen-Souvlaki mit Tzatziki & Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
 source:'The Mediterranean Dish',sourceUrl:'https://www.themediterraneandish.com/greek-chicken-souvlaki-recipe-tzatziki/',
-needs:[['chicken600',200],['fries1k',250],['yogurt500',150],['cucumber1',1]],extras:['Zitrone','Knoblauch','Oregano','Rosmarin','Paprikapulver','Olivenöl','Tomate'],
+needs:[['chicken600',200],['fries1k',250],['yogurt500',150],['cucumber1',1]],extras:[['Zitrone','1 Stück'],['Knoblauch','1 Zehe'],['Oregano','1 TL'],['Rosmarin','½ TL'],['Paprikapulver','½ TL'],['Olivenöl','10 ml'],['Tomate','1 Stück']],
 steps:['Hähnchen mit Zitronensaft, Knoblauch, Oregano, Rosmarin, Paprika, Pfeffer und wenig Olivenöl marinieren.','250 g Wedges in Zone 1 knusprig garen.','Hähnchen in Zone 2 vollständig garen und leicht bräunen.','Aus Joghurt, geriebener Gurke, Knoblauch und Zitrone Tzatziki rühren.','Mit Tomate und Tzatziki servieren.']},
 {day:'Mittwoch',name:'Garnelen-Gemüse-Stir-Fry mit Reis',kcal:650,time:'20 Min.',device:'Wok + Topf',
 source:'Damn Delicious',sourceUrl:'https://damndelicious.net/2015/01/16/easy-shrimp-broccoli-stir-fry/',
-needs:[['prawns225',225],['wok750',300],['riceJ1k',70]],extras:['Sojasauce, natriumreduziert','Austernsauce','Reisessig','Ingwer','Knoblauch','Sesamöl','Speisestärke','Sriracha optional'],
+needs:[['prawns225',225],['wok750',300],['riceJ1k',70]],extras:[['Sojasauce, natriumreduziert','20 ml'],['Austernsauce','15 ml'],['Reisessig','10 ml'],['Ingwer','8 g'],['Knoblauch','1 Zehe'],['Sesamöl','5 ml'],['Speisestärke','5 g'],['Sriracha','optional']],
 steps:['70 g Reis kochen.','Sauce aus Sojasauce, Austernsauce, Reisessig, Ingwer, Knoblauch, Sesamöl und etwas Speisestärke anrühren.','Wok sehr heiß werden lassen und Gemüse kräftig anbraten.','Garnelen dazugeben und nur so lange braten, bis sie gar sind.','Sauce einrühren und kurz eindicken lassen. Mit Reis servieren.']},
 {day:'Donnerstag',name:'Chili con Carne mit Bohnen',kcal:690,time:'35 Min.',device:'Topf',
 source:'Plain Chicken',sourceUrl:'https://www.plainchicken.com/lunch-lady-chili-con-carne/',
-needs:[['kidney255',255],['tomato400',400],['corn285',100],['riceP1k',60]],extras:['Mageres Rinderhack','Zwiebel','Tomatenmark','Knoblauch','Chilipulver','Kreuzkümmel','Paprikapulver','Pfeffer'],
+needs:[['kidney255',255],['tomato400',400],['corn285',100],['riceP1k',60]],extras:[['Mageres Rinderhack','150 g'],['Zwiebel','½ Stück'],['Tomatenmark','20 g'],['Knoblauch','1 Zehe'],['Chilipulver','½ TL'],['Kreuzkümmel','1 TL'],['Paprikapulver','1 TL'],['Pfeffer','nach Geschmack']],
 steps:['60 g Reis kochen.','Zwiebel und mageres Hack kräftig anbraten.','Knoblauch, Chili, Kreuzkümmel und Paprika kurz mitrösten.','Tomaten, Tomatenmark, Kidneybohnen und etwas Mais zugeben.','Etwa 15–20 Minuten köcheln lassen und abschmecken. Mit Reis servieren.']},
 {day:'Freitag',name:'Rotes Thai-Hähnchen-Curry mit Jasminreis',kcal:730,time:'25 Min.',device:'Wok + Topf',
 source:'Modern Honey',sourceUrl:'https://www.modernhoney.com/thai-red-chicken-curry/',
-needs:[['chicken600',200],['wok750',300],['coconut250',125],['riceJ1k',75]],extras:['Rote Currypaste','Zwiebel','Knoblauch','Limette','Fischsauce optional','Thai-Basilikum oder Koriander','etwas Zucker oder Honig'],
+needs:[['chicken600',200],['wok750',300],['coconut250',125],['riceJ1k',75]],extras:[['Rote Currypaste','20 g'],['Zwiebel','½ Stück'],['Knoblauch','1 Zehe'],['Limette','½ Stück'],['Fischsauce','5 ml optional'],['Thai-Basilikum oder Koriander','10 g'],['Zucker oder Honig','5 g']],
 steps:['75 g Jasminreis kochen.','Zwiebel und Knoblauch anschwitzen, rote Currypaste kurz mitrösten.','200 g Hähnchen zugeben und anbraten.','300 g Gemüse und 125 ml Kokosmilch zugeben und sanft köcheln, bis das Hähnchen gar ist.','Mit Limette, wenig Süße und optional Fischsauce abschmecken. Mit Kräutern servieren.']},
 {day:'Samstag',name:'Mediterrane Polenta mit Gemüse & Hirtenkäse',kcal:680,time:'25 Min.',device:'Topf + Pfanne',
 source:'eigene Variante auf Basis klassischer cremiger Polenta',sourceUrl:'',
-needs:[['polenta500',80],['tomato400',200],['feta250',60]],extras:['Zucchini','Paprika','Knoblauch','Olivenöl','Oregano oder italienische Kräuter','Gemüsebrühe'],
+needs:[['polenta500',80],['tomato400',200],['feta250',60]],extras:[['Zucchini','150 g'],['Paprika','½ Stück'],['Knoblauch','1 Zehe'],['Olivenöl','10 ml'],['Oregano oder italienische Kräuter','1 TL'],['Gemüsebrühe','250 ml']],
 steps:['Polenta in Gemüsebrühe nach Packungsangabe cremig garen.','Zucchini und Paprika in wenig Olivenöl kräftig anbraten.','Knoblauch und Tomaten zugeben, würzen und einige Minuten einkochen.','Gemüse auf die Polenta geben und 60 g Hirtenkäse darüberbröseln.']},
 {day:'Sonntag',name:'Schnelle Paella mit großem Zitronen-Salat',kcal:700,time:'15 Min.',device:'Pfanne',
 source:'ja! Paella als schnelle Vorratsoption',sourceUrl:'',
-needs:[['paella750',375]],extras:['Blattsalat','Tomate','Gurke','Zitrone','Olivenöl'],
+needs:[['paella750',375]],extras:[['Blattsalat','100 g'],['Tomate','1 Stück'],['Gurke','½ Stück'],['Zitrone','½ Stück'],['Olivenöl','10 ml']],
 steps:['375 g Paella nach Packungsangabe in einer großen Pfanne vollständig erhitzen.','Salat, Tomate und Gurke vorbereiten.','Aus Zitrone, wenig Olivenöl und Pfeffer ein schnelles Dressing rühren.','Paella mit dem großen frischen Salat servieren.']}
 ];
 
@@ -249,7 +249,7 @@ function shoppingForDay(dayIndex){
    }
  });
  // Extras from lunch remain visible as "nach Bedarf".
- meals[dayIndex].extras.forEach(x=>arr.push({id:'extra:'+x,name:x,text:'nach Bedarf',extra:true}));
+ meals[dayIndex].extras.forEach(x=>{const name=Array.isArray(x)?x[0]:x;const amount=Array.isArray(x)?x[1]:'Menge noch festlegen';arr.push({id:'extra:'+name,name,text:`⚠️ Nicht in Produkte gespeichert · Rezept: ${amount}`,extra:true,missingProduct:true});});
  return arr;
 }
 function shoppingFor(m){
@@ -257,7 +257,7 @@ function shoppingFor(m){
  m.needs.forEach(([id,need])=>{let p=P(id),h=have(id),missing=Math.max(0,need-h),packs=packCount(id,need);
    if(missing>0) arr.push({id,name:p.name,text:`${packs} × ${p.pack} ${p.unit}`,need,missing,packs,rest:fmt(packs*p.pack-missing)});
  });
- m.extras.forEach(x=>arr.push({id:'extra:'+x,name:x,text:'nach Bedarf',extra:true}));
+ m.extras.forEach(x=>{const name=Array.isArray(x)?x[0]:x;const amount=Array.isArray(x)?x[1]:'Menge noch festlegen';arr.push({id:'extra:'+name,name,text:`⚠️ Nicht in Produkte gespeichert · Rezept: ${amount}`,extra:true,missingProduct:true});});
  return arr;
 }
 function nav(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.v===v));document.getElementById(v).classList.add('active');render()}
