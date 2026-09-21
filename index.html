@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><title>Mein Essensplan V2.3</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.4</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
@@ -21,7 +22,8 @@ input,select{width:100%;border:1px solid #d8ddd9;border-radius:12px;padding:11px
 footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;background:#f4f6f1;color:var(--muted);font-size:12px}
 </style></head><body>
 <header><h1>🍽️ Mein Essensplan</h1><p>Deine Produkte · kleine Einkäufe · echte Packungsgrößen</p>
-<p id="clockline" class="small"></p></header>
+<p id="clockline" class="small"></p>
+<div id="cloudbar" class="small"><span id="cloudstatus">☁️ Cloud wird vorbereitet…</span> <button id="cloudbtn" class="btn small alt" style="display:none" onclick="cloudAction()">Anmelden</button></div></header>
 <nav class="tabs" id="tabs">
 <button data-v="today" class="active">Heute</button><button data-v="shop">Einkaufen</button><button data-v="cook">Kochen</button>
 <button data-v="week">Woche</button><button data-v="stock">Vorrat</button><button data-v="products">Produkte</button>
@@ -29,7 +31,7 @@ footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;back
 <main>
 <section id="today" class="view active"></section><section id="shop" class="view"></section><section id="cook" class="view"></section>
 <section id="week" class="view"></section><section id="stock" class="view"></section><section id="products" class="view"></section>
-</main><footer>Version 2.3 · Tages-Einkauf für 3 Mahlzeiten · Deutschland-Zeit · Daten bleiben lokal</footer>
+</main><footer>Version 2.4 · Tages-Einkauf · Cloud-Synchronisierung + lokaler Offline-Speicher</footer>
 <script>
 const baseProducts=[
 {id:'chicken600',name:'ja! Hähnchen-Brustfilet',pack:600,unit:'g',type:'frisch'},
@@ -79,6 +81,72 @@ const baseProducts=[
 let customProducts=JSON.parse(localStorage.customProducts||'[]');
 function productsAll(){return [...baseProducts,...customProducts]}
 let inventory=JSON.parse(localStorage.inventoryV2||'{}');
+const SUPABASE_URL='https://excnkswjqjniwcnakuhc.supabase.co';
+const SUPABASE_KEY='sb_publishable_3AeeFKsxYX3NJok2uVPlIg_vUxraHaU';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let cloudUser=null, cloudBusy=false;
+
+async function initCloud(){
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    cloudUser=session?.user||null;
+    sb.auth.onAuthStateChange((_e,s)=>{cloudUser=s?.user||null; updateCloudBar(); if(cloudUser) syncFromCloud();});
+    updateCloudBar();
+    if(cloudUser) await syncFromCloud();
+  }catch(e){document.getElementById('cloudstatus').textContent='☁️ Lokal aktiv · Cloud derzeit nicht erreichbar';}
+}
+function updateCloudBar(){
+  const s=document.getElementById('cloudstatus'),b=document.getElementById('cloudbtn'); if(!s||!b)return;
+  if(cloudUser){s.textContent='☁️ Synchronisiert · '+(cloudUser.email||'angemeldet');b.textContent='Abmelden';b.style.display='inline-block';}
+  else{s.textContent='📱 Lokal gespeichert · für Geräte-Sync anmelden';b.textContent='Anmelden';b.style.display='inline-block';}
+}
+async function cloudAction(){
+  if(cloudUser){await sb.auth.signOut();return;}
+  const email=prompt('E-Mail-Adresse für deinen Essensplan:'); if(!email)return;
+  const password=prompt('Passwort (mindestens 6 Zeichen):'); if(!password)return;
+  let {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){
+    const create=confirm('Anmeldung nicht möglich. Soll mit dieser E-Mail ein neues Konto angelegt werden?');
+    if(!create)return;
+    const r=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin}});
+    if(r.error){alert('Konto konnte nicht angelegt werden: '+r.error.message);return;}
+    if(!r.data.session){alert('Konto angelegt. Bitte bestätige die E-Mail von Supabase und melde dich danach hier an.');return;}
+  }
+}
+async function syncFromCloud(){
+  if(!cloudUser||cloudBusy)return; cloudBusy=true;
+  try{
+    const {data,error}=await sb.from('inventory').select('product_key,quantity,unit').eq('user_id',cloudUser.id);
+    if(error)throw error;
+    if(data&&data.length){
+      data.forEach(x=>inventory[x.product_key]=+x.quantity);
+      localStorage.inventoryV2=JSON.stringify(inventory);
+    }else{
+      await syncInventoryToCloud();
+    }
+    const {data:cp}=await sb.from('user_products').select('product_key,name,package_size,unit,storage').eq('user_id',cloudUser.id);
+    if(cp&&cp.length){
+      const known=new Set(customProducts.map(x=>x.id));
+      cp.forEach(x=>{if(x.product_key&&!known.has(x.product_key))customProducts.push({id:x.product_key,name:x.name,pack:+x.package_size,unit:x.unit,type:x.storage||'Vorrat'});});
+      localStorage.customProducts=JSON.stringify(customProducts);
+    }else if(customProducts.length){await syncCustomProductsToCloud();}
+    render(); updateCloudBar();
+  }catch(e){document.getElementById('cloudstatus').textContent='⚠️ Lokal aktiv · Cloud-Sync fehlgeschlagen';}
+  finally{cloudBusy=false;}
+}
+async function syncInventoryToCloud(){
+  if(!cloudUser)return;
+  const rows=Object.entries(inventory).map(([id,q])=>({user_id:cloudUser.id,product_key:id,quantity:+q,unit:P(id)?.unit||'Stück'}));
+  if(rows.length) await sb.from('inventory').upsert(rows,{onConflict:'user_id,product_key'});
+}
+async function syncOneInventory(id){
+  if(!cloudUser)return; const p=P(id);
+  await sb.from('inventory').upsert({user_id:cloudUser.id,product_key:id,quantity:have(id),unit:p?.unit||'Stück'},{onConflict:'user_id,product_key'});
+}
+async function syncCustomProductsToCloud(){
+  if(!cloudUser||!customProducts.length)return;
+  await sb.from('user_products').upsert(customProducts.map(p=>({user_id:cloudUser.id,product_key:p.id,name:p.name,package_size:p.pack,unit:p.unit,storage:p.type})),{onConflict:'user_id,product_key'});
+}
 function germanyNow(){
   const parts=new Intl.DateTimeFormat('de-DE',{
     timeZone:'Europe/Berlin',
@@ -180,8 +248,8 @@ function shoppingFor(m){
 function nav(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.v===v));document.getElementById(v).classList.add('active');render()}
 tabs.onclick=e=>{if(e.target.dataset.v)nav(e.target.dataset.v)}
 function selectDay(i){selected=i;localStorage.selectedDayV2=i;nav('today')}
-function addInv(id,amount){inventory[id]=Math.max(0,fmt(have(id)+(+amount||0)));localStorage.inventoryV2=JSON.stringify(inventory);render()}
-function setInv(id,amount){inventory[id]=Math.max(0,+amount||0);localStorage.inventoryV2=JSON.stringify(inventory);render()}
+function addInv(id,amount){inventory[id]=Math.max(0,fmt(have(id)+(+amount||0)));localStorage.inventoryV2=JSON.stringify(inventory);render();syncOneInventory(id)}
+function setInv(id,amount){inventory[id]=Math.max(0,+amount||0);localStorage.inventoryV2=JSON.stringify(inventory);render();syncOneInventory(id)}
 function buyItem(id,packs){let p=P(id);addInv(id,p.pack*packs)}
 function useMeal(){
  let m=meals[selected]; m.needs.forEach(([id,n])=>setInv(id,Math.max(0,have(id)-n))); alert('Verbrauch wurde aus dem Vorrat abgezogen. Restmengen kannst du im Vorrat korrigieren.');
@@ -190,7 +258,7 @@ function toggleCheck(k,v){checked[k]=v;localStorage.checkedV2=JSON.stringify(che
 function addProduct(){
  let name=document.getElementById('pn').value.trim(),pack=+document.getElementById('pp').value,unit=document.getElementById('pu').value,type=document.getElementById('pt').value;
  if(!name||!pack)return alert('Bitte Produktname und Packungsgröße eingeben.');
- let id='custom'+Date.now();customProducts.push({id,name,pack,unit,type});localStorage.customProducts=JSON.stringify(customProducts);render();
+ let id='custom'+Date.now();customProducts.push({id,name,pack,unit,type});localStorage.customProducts=JSON.stringify(customProducts);render();syncCustomProductsToCloud();
 }
 function render(){
  const n=germanyNow();
@@ -215,5 +283,6 @@ function render(){
  products.innerHTML=`<div class="card"><h2>❤️ Meine Produkte</h2><p class="muted">Startbestand aus deinen REWE-Favoriten. Fehlende Produkte kannst du jederzeit ergänzen.</p>${productsAll().map(p=>`<div class="item"><strong>${p.name}</strong><span class="small">${p.pack} ${p.unit} · ${p.type}</span></div>`).join('')}</div>
  <div class="card"><h3>➕ Produkt hinzufügen</h3><input id="pn" placeholder="z. B. Polenta"><div class="grid2" style="margin-top:8px"><input id="pp" type="number" placeholder="Packungsgröße"><select id="pu"><option>g</option><option>ml</option><option>Stück</option></select></div><select id="pt" style="margin-top:8px"><option>Vorrat</option><option>Kühlschrank</option><option>TK</option><option>frisch</option></select><button class="btn" onclick="addProduct()">Produkt speichern</button></div>`;
 }
-render();
+render();initCloud();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 </script></body></html>
