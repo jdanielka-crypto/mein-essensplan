@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.1</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -39,7 +39,7 @@ footer{position:fixed;bottom:0;left:0;right:0;text-align:center;padding:9px;back
 <main>
 <section id="today" class="view active"></section><section id="shop" class="view"></section><section id="cook" class="view"></section>
 <section id="week" class="view"></section><section id="stock" class="view"></section><section id="products" class="view"></section>
-</main><footer>Version 2.7 · REWE-Linkimport + manuelle Produkte · Cloud-Synchronisierung</footer>
+</main><footer>Version 2.7.1 · robuster REWE-Linkimport + manuelle Produkte · Cloud-Synchronisierung</footer>
 <script>
 const baseProducts=[
 {id:'chicken600',name:'ja! Hähnchen-Brustfilet',pack:600,unit:'g',type:'frisch'},
@@ -284,7 +284,7 @@ async function importReweUrl(){
   window.pendingProductImport=d;
   const n=d.nutrition||{};
   const found=[n.kcal!=null?n.kcal+' kcal':'',n.protein!=null?n.protein+' g Eiweiß':'',n.fat!=null?n.fat+' g Fett':'',n.carbs!=null?n.carbs+' g KH':'',n.salt!=null?n.salt+' g Salz':''].filter(Boolean).join(' · ');
-  status.innerHTML='✅ Daten gefunden'+(d.brand?' · '+d.brand:'')+(d.articleNumber?' · REWE '+d.articleNumber:'')+(found?'<br><span class="tiny">'+found+' / 100 g</span>':'')+'<br><span class="tiny">Bitte prüfen und anschließend Produkt speichern.</span>';
+  status.innerHTML=(d.partial?'⚠️ Teilweise übernommen':'✅ Daten gefunden')+(d.brand?' · '+d.brand:'')+(d.articleNumber?' · REWE '+d.articleNumber:'')+(found?'<br><span class="tiny">'+found+' / 100 g</span>':'')+(d.warning?'<br><span class="tiny">'+d.warning+'</span>':'')+'<br><span class="tiny">Bitte prüfen und anschließend Produkt speichern.</span>';
  }catch(e){status.textContent='⚠️ '+e.message+' Du kannst das Produkt weiterhin manuell eintragen.';}
 }
 function addProduct(){
