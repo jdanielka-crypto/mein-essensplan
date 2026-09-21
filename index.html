@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.8</title>
+<meta name="theme-color" content="#163c2d"><link rel="manifest" href="./manifest.webmanifest"><title>Mein Essensplan V2.7.9</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f4f6f1;--card:#fff;--ink:#17201c;--muted:#68736d;--green:#163c2d;--light:#e7efe8;--accent:#dfe9cf;--warn:#fff4d8}
@@ -185,7 +185,7 @@ let checked=JSON.parse(localStorage.checkedV2||'{}');
 const meals=[
 {day:'Montag',name:'Teriyaki-Hähnchen mit Brokkoli & Reis',kcal:700,time:'20 Min.',device:'Wok + Topf',
 source:'Chef De Home',sourceUrl:'https://www.chefdehome.com/recipes/948/teriyaki-chicken',
-needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['broccoliFrozen1k',150],['soyLight150',25],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['sugar1k',10],['Frühlingszwiebel','1 Stück']],
+needs:[['chicken600',200],['riceJ1k',75],['starch400',5]],extras:[['broccoliFrozen1k',150],['soyLight150',25],['Reisessig','15 ml'],['Ingwer','10 g'],['Knoblauch','1 Zehe'],['sesame500',5],['sugar1k',10],['springOnionBunch','1 Bund']],
 steps:['75 g Reis kochen.','Sauce aus Sojasauce, Reisessig, Ingwer, Knoblauch, wenig Süße und Speisestärke anrühren.','200 g Hähnchen im sehr heißen Wok kräftig anbraten.','Sauce zugeben und kurz einkochen, bis sie glänzend am Hähnchen haftet.','Brokkoli kurz mitgaren, sodass er bissfest bleibt. Mit wenig Sesamöl und Frühlingszwiebel abschließen.']},
 {day:'Dienstag',name:'Griechisches Hähnchen-Souvlaki mit Tzatziki & Wedges',kcal:730,time:'25 Min.',device:'Ninja Dual Zone',
 source:'The Mediterranean Dish',sourceUrl:'https://www.themediterraneandish.com/greek-chicken-souvlaki-recipe-tzatziki/',
@@ -262,7 +262,11 @@ function shoppingForDay(dayIndex){
    }
  });
  // Extras from lunch remain visible as "nach Bedarf".
- meals[dayIndex].extras.forEach(x=>{const name=Array.isArray(x)?x[0]:x;const amount=Array.isArray(x)?x[1]:'Menge noch festlegen';arr.push({id:'extra:'+name,name,text:`⚠️ Nicht in Produkte gespeichert · Rezept: ${amount}`,extra:true,missingProduct:true});});
+ meals[dayIndex].extras.forEach(x=>{
+ const key=Array.isArray(x)?x[0]:x, amount=Array.isArray(x)?x[1]:'Menge noch festlegen', p=P(key);
+ if(p){const need=+amount||0,h=have(key),missing=Math.max(0,need-h);if(missing>0){const packs=Math.ceil(missing/p.pack);arr.push({id:key,name:p.name,text:`${packs} × ${p.pack} ${p.unit}`,need,missing,packs,rest:fmt(packs*p.pack-missing)});}}
+ else arr.push({id:'extra:'+key,name:key,text:`⚠️ Nicht in Produkte gespeichert · Rezept: ${amount}`,extra:true,missingProduct:true});
+});
  return arr;
 }
 function shoppingFor(m){
@@ -270,7 +274,11 @@ function shoppingFor(m){
  m.needs.forEach(([id,need])=>{let p=P(id),h=have(id),missing=Math.max(0,need-h),packs=packCount(id,need);
    if(missing>0) arr.push({id,name:p.name,text:`${packs} × ${p.pack} ${p.unit}`,need,missing,packs,rest:fmt(packs*p.pack-missing)});
  });
- m.extras.forEach(x=>{const name=Array.isArray(x)?x[0]:x;const amount=Array.isArray(x)?x[1]:'Menge noch festlegen';arr.push({id:'extra:'+name,name,text:`⚠️ Nicht in Produkte gespeichert · Rezept: ${amount}`,extra:true,missingProduct:true});});
+ m.extras.forEach(x=>{
+ const key=Array.isArray(x)?x[0]:x, amount=Array.isArray(x)?x[1]:'Menge noch festlegen', p=P(key);
+ if(p){const need=+amount||0,h=have(key),missing=Math.max(0,need-h),packs=missing?Math.ceil(missing/p.pack):0;if(missing>0)arr.push({id:key,name:p.name,text:`${packs} × ${p.pack} ${p.unit}`,need,missing,packs,rest:fmt(packs*p.pack-missing)});}
+ else arr.push({id:'extra:'+key,name:key,text:`⚠️ Nicht in Produkte gespeichert · Rezept: ${amount}`,extra:true,missingProduct:true});
+});
  return arr;
 }
 function nav(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.v===v));document.getElementById(v).classList.add('active');render()}
